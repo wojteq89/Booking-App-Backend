@@ -28,13 +28,17 @@ class LoginController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
+        // Tworzenie tokena
         $token = $user->createToken('auth_token')->plainTextToken;
-        $expiresAt = Carbon::now()->addHours(5);
-        $user->tokens()->latest()->update(['expires_at' => $expiresAt]);
+
+        // Ustalenie daty wygaśnięcia tokena
+        $expiresAt = Carbon::now()->addMinutes(5);
+
+        // Zapisanie daty wygaśnięcia tylko dla tego tokena
+        $user->tokens()->where('id', $user->tokens()->latest()->first()->id)->update(['expires_at' => $expiresAt]);
 
         return response()->json([
             'token' => $token,
-            'expires_at' => $expiresAt,
         ]);
     }
 }

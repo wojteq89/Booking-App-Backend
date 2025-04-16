@@ -9,7 +9,7 @@ use Carbon\Carbon;
 class TokenController extends Controller
 {
     /**
-     * Sprawdzenie, czy token użytkownika wygasł.
+     * Sprawdzenie, czy tokeny użytkownika wygasły i usunięcie tych, które wygasły.
      *
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -17,13 +17,16 @@ class TokenController extends Controller
     public function checkTokenExpiry(Request $request)
     {
         $user = $request->user();
-        
-        if ($user->currentAccessToken()->expires_at && Carbon::parse($user->currentAccessToken()->expires_at)->isPast()) {
-            $user->currentAccessToken()->delete();
-            
-            return response()->json(['message' => 'Token expired'], 401);
+
+        // Iterujemy po wszystkich tokenach użytkownika
+        foreach ($user->tokens as $token) {
+            // Sprawdzamy, czy token ma ustawioną datę wygaśnięcia i czy jest już po dacie wygaśnięcia
+            if ($token->expires_at && Carbon::parse($token->expires_at)->isPast()) {
+                // Usuwamy token, który wygasł
+                $token->delete();
+            }
         }
 
-        return response()->json(['message' => 'Token valid'], 200);
+        return response()->json(['message' => 'Expired tokens removed'], 200);
     }
 }
