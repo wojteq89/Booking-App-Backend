@@ -32,7 +32,7 @@ class LoginController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         // Ustalenie daty wygaśnięcia tokena
-        $expiresAt = Carbon::now()->addMinutes(5);
+        $expiresAt = Carbon::now()->addMinutes(60);
 
         // Zapisanie daty wygaśnięcia tylko dla tego tokena
         $user->tokens()->where('id', $user->tokens()->latest()->first()->id)->update(['expires_at' => $expiresAt]);
