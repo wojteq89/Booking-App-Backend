@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Services;
+use App\Http\Controllers\Controller; 
 use Illuminate\Http\Request;
 
-class ServiceController extends Controller
+class ServiceItemController extends Controller
 {
     /**
      * Display a listing of the resource.

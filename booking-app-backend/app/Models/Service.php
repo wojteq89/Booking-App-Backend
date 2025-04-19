@@ -6,6 +6,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
+    protected $fillable = [
+        'name',
+        'category',
+        'location',
+        'description',
+        'opening_hours',
+        'images',
+        'user_id',
+    ];
+    
     public function reviews()
     {
         return $this->hasMany(Review::class);
