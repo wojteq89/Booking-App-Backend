@@ -52,7 +52,7 @@ class ServiceController extends Controller
         $user->role = 'owner';
         $user->save();
     
-        return response()->json(['message' => 'Usługa dodana', 'service' => $service], 201);
+        return response()->json(['message' => 'Service added', 'service' => $service], 201);
     }
 
     /**
@@ -60,7 +60,13 @@ class ServiceController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $service = Service::find($id);
+    
+        if (!$service) {
+            return response()->json(['message' => 'Service not found'], 404);
+        }
+    
+        return response()->json(['service' => $service]);
     }
 
     /**
@@ -100,6 +106,23 @@ class ServiceController extends Controller
             $user->save();
         }
     
-        return response()->json(['message' => 'Usługa usunięta']);
-    }    
+        return response()->json(['message' => 'Service deleted']);
+    }
+
+    public function myService()
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'owner') {
+            return response()->json(['message' => 'Access denied'], 403);
+        }
+
+        $service = Service::where('user_id', $user->id)->first();
+
+        if (!$service) {
+            return response()->json(['message' => 'No service found for this user'], 404);
+        }
+
+        return response()->json(['service' => $service]);
+    }
 }

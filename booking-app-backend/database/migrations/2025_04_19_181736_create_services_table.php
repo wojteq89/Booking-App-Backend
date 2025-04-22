@@ -13,15 +13,15 @@ return new class extends Migration
     {
         Schema::create('services', function (Blueprint $table) {
             $table->id();
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->unsignedBigInteger('user_id');
             $table->string('name');
             $table->string('category');
             $table->string('location');
             $table->text('description')->nullable();
             $table->string('opening_hours')->nullable();
             $table->json('images')->nullable();
-            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });        
     }
 
