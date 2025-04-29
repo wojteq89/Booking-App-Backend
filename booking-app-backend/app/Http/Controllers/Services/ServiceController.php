@@ -5,6 +5,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ServiceController extends Controller
 {
@@ -35,8 +37,18 @@ class ServiceController extends Controller
             'location' => 'required|string',
             'description' => 'nullable|string',
             'opening_hours' => 'nullable|string',
-            'images' => 'nullable|array',
+            'images.*' => 'nullable|image|max:2048',
         ]);
+    
+        $folderName = Str::slug($request->name) . '-' . time();
+    
+        $imagePaths = [];
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $path = $image->store("services/{$folderName}", 'public');
+                $imagePaths[] = Storage::url($path);
+            }
+        }
     
         $service = new Service();
         $service->name = $request->name;
@@ -44,7 +56,7 @@ class ServiceController extends Controller
         $service->location = $request->location;
         $service->description = $request->description;
         $service->opening_hours = $request->opening_hours;
-        $service->images = $request->images ? json_encode($request->images) : null;
+        $service->images = json_encode($imagePaths);
         $service->user_id = Auth::id();
         $service->save();
     
