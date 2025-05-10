@@ -1,64 +1,70 @@
 <?php
-
 namespace App\Http\Controllers\Business;
-use App\Http\Controllers\Controller; 
+
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\ServiceItem;
+use App\Models\Service;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceItemController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $user = Auth::user();
+
+        $items = ServiceItem::whereHas('service', function ($query) use ($user) {
+            $query->where('user_id', $user->id);
+        })->get();
+
+        return response()->json(['services' => $items]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'service_id' => 'required|exists:services,id',
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric',
+            'duration' => 'nullable|integer',
+        ]);
+
+        $service = Service::findOrFail($request->service_id);
+
+        if ($service->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $item = ServiceItem::create($request->all());
+
+        return response()->json($item, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $item = ServiceItem::with('service')->findOrFail($id);
+
+        if ($item->service->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $item->update($request->only(['name', 'description', 'price', 'duration']));
+
+        return response()->json($item);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    public function destroy($id)
     {
-        //
-    }
+        $item = ServiceItem::with('service')->findOrFail($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        if ($item->service->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $item->delete();
+
+        return response()->json(['message' => 'Item deleted']);
     }
 }

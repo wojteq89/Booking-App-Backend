@@ -45,7 +45,7 @@ class BusinessController extends Controller
         $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
-                $path = $image->store("services/{$folderName}", 'public');
+                $path = $image->store("business/{$folderName}", 'public');
                 $imagePaths[] = Storage::url($path);
             }
         }
@@ -64,7 +64,7 @@ class BusinessController extends Controller
         $user->role = 'owner';
         $user->save();
     
-        return response()->json(['message' => 'Service added', 'service' => $service], 201);
+        return response()->json(['message' => 'Business added', 'business' => $service], 201);
     }
 
     /**
@@ -75,10 +75,10 @@ class BusinessController extends Controller
         $service = Service::find($id);
     
         if (!$service) {
-            return response()->json(['message' => 'Service not found'], 404);
+            return response()->json(['message' => 'Business not found'], 404);
         }
     
-        return response()->json(['service' => $service]);
+        return response()->json(['Business' => $service]);
     }
 
     /**
@@ -105,7 +105,7 @@ class BusinessController extends Controller
         $service = Service::findOrFail($id);
     
         if ($service->user_id !== Auth::id()) {
-            return response()->json(['message' => 'Brak dostępu'], 403);
+            return response()->json(['message' => 'No permission'], 403);
         }
     
         $service->delete();
@@ -118,7 +118,7 @@ class BusinessController extends Controller
             $user->save();
         }
     
-        return response()->json(['message' => 'Service deleted']);
+        return response()->json(['message' => 'Business deleted']);
     }
 
     public function myService()
@@ -132,9 +132,9 @@ class BusinessController extends Controller
         $service = Service::where('user_id', $user->id)->first();
 
         if (!$service) {
-            return response()->json(['message' => 'No service found for this user'], 404);
+            return response()->json(['message' => 'No business found for this user'], 404);
         }
 
-        return response()->json(['service' => $service]);
+        return response()->json(['business' => $service]);
     }
 }
