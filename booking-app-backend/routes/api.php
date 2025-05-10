@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\TokenController;
-use App\Http\Controllers\Services\ServiceController;
+use App\Http\Controllers\Business\BusinessController;
 
 // Public endpoints ---------------------
 Route::post('/login', [LoginController::class, 'login']);
@@ -21,8 +21,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/check-token-expiry', [TokenController::class, 'checkTokenExpiry']);
 
   // Services ---------------------
-    Route::post('/services-add', [ServiceController::class, 'store']);
-    Route::delete('/services-delete/{id}', [ServiceController::class, 'destroy']);
-    Route::get('/my-service', [ServiceController::class, 'myService']);
-    Route::get('/services/{id}', [ServiceController::class, 'show']);
+    Route::post('/business-add', [BusinessController::class, 'store']);
+    Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
+    Route::get('/my-business', [BusinessController::class, 'myService']);
+    Route::get('/business/{id}', [BusinessController::class, 'show']);
 });
