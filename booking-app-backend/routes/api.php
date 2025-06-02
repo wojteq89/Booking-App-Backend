@@ -10,10 +10,13 @@ use App\Http\Controllers\Auth\TokenController;
 use App\Http\Controllers\Business\BusinessController;
 use App\Http\Controllers\Business\ServiceItemController;
 use App\Http\Controllers\Business\ReviewController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 // Public endpoints ---------------------
   Route::post('/login', [LoginController::class, 'login']);
   Route::post('/register', [RegisterController::class, 'register']);
+  Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLinkEmail']);
+  Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 // Private endpoints ---------------------
   Route::middleware('auth:sanctum')->group(function () {
