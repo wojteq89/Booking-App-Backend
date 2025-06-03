@@ -4,11 +4,16 @@
   <meta charset="UTF-8" />
   <title>Resetuj hasło</title>
   <style>
+
+    * {
+      box-sizing: border-box;
+      transition: all 0.5s ease-in-out;
+    }
+    
     body {
       font-family: 'Poppins', sans-serif;
       background-color: #f4f4f4;
       margin: 0;
-      padding: 20px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,13 +28,13 @@
       width: 80vh;
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      justify-content: center;
+      align-items: center;
       color: #414e66; /* $primary */
     }
 
     h2.title {
       font-size: 30px;
-      margin-bottom: 20px;
       color: #414e66; /* $primary */
     }
 
@@ -38,11 +43,17 @@
       flex-direction: column;
       gap: 30px;
       width: 100%;
+      overflow: hidden;
+    }
+
+    .row {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
     }
 
     label {
       font-size: 16px;
-      margin-bottom: 5px;
       color: #414e66; /* $primary */
       font-weight: 600;
     }
@@ -57,6 +68,10 @@
       border-radius: 0;
       transition: all 0.5s ease-in-out;
       font-family: 'Poppins', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
     }
 
     input.input-field:focus {
@@ -81,7 +96,8 @@
       transition: all 0.5s ease-in-out;
       font-family: 'Poppins', sans-serif;
       width: max-content;
-      align-self: flex-start;
+      align-self: center;
+      margin-bottom: 20px;
     }
 
     button.custom-button:hover {
@@ -104,6 +120,25 @@
       padding-left: 20px;
       margin: 0;
     }
+
+    @media screen and (max-width: 900px) {
+      .container {
+        width: 90vw;
+        padding: 20px;
+        box-shadow: none;
+        
+      }
+
+      h2.title {
+        font-size: 24px;
+      }
+
+      input.input-field, button.custom-button {
+        font-size: 16px;
+      }
+      
+    }
+
   </style>
 </head>
 <body>
@@ -120,18 +155,18 @@
 
       <input type="hidden" name="token" value="{{ $token }}">
 
-      <div>
-        <label for="email">Email:</label><br />
+      <div class="row">
+        <label for="email">Email:</label>
         <input id="email" type="email" name="email" required class="input-field" />
       </div>
 
-      <div>
-        <label for="password">Nowe hasło:</label><br />
+      <div class="row">
+        <label for="password">Nowe hasło:</label>
         <input id="password" type="password" name="password" required class="input-field" />
       </div>
 
-      <div>
-        <label for="password_confirmation">Powtórz hasło:</label><br />
+      <div class="row">
+        <label for="password_confirmation">Powtórz hasło:</label>
         <input id="password_confirmation" type="password" name="password_confirmation" required class="input-field" />
       </div>
 
