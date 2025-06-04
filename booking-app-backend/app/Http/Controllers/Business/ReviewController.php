@@ -15,15 +15,28 @@ class ReviewController extends Controller
     {
         $validated = $request->validate([
             'service_id' => 'required|exists:services,id',
+            'user_id' => 'required|exists:users,id',
             'client_name' => 'required|string|max:255',
             'content' => 'required|string',
             'rating' => 'required|integer|min:1|max:5',
         ]);
 
+        // Sprawdź, czy opinia od tego usera dla danego service_id już istnieje
+        $existingReview = Review::where('service_id', $validated['service_id'])
+            ->where('user_id', $validated['user_id'])
+            ->first();
+
+        if ($existingReview) {
+            return response()->json([
+                'message' => 'Użytkownik już dodał opinię dla tej usługi.'
+            ], 422);  // Kod 422 Unprocessable Entity (lub inny według Ciebie)
+        }
+
         $review = Review::create($validated);
 
         return response()->json(['review' => $review], 201);
     }
+
 
     /**
      * Update the specified review.
@@ -63,6 +76,22 @@ class ReviewController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return response()->json(['reviews' => $reviews]);
+        $count = $reviews->count();
+        $average = round($reviews->avg('rating'), 2); // np. 4.37
+
+        $ratingsCount = [
+            5 => $reviews->where('rating', 5)->count(),
+            4 => $reviews->where('rating', 4)->count(),
+            3 => $reviews->where('rating', 3)->count(),
+            2 => $reviews->where('rating', 2)->count(),
+            1 => $reviews->where('rating', 1)->count(),
+        ];
+
+        return response()->json([
+            'reviews' => $reviews,
+            'total' => $count,
+            'average_rating' => $average,
+            'ratings_breakdown' => $ratingsCount,
+        ]);
     }
 }
