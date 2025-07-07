@@ -21,7 +21,6 @@ class ReviewController extends Controller
             'rating' => 'required|integer|min:1|max:5',
         ]);
 
-        // Sprawdź, czy opinia od tego usera dla danego service_id już istnieje
         $existingReview = Review::where('service_id', $validated['service_id'])
             ->where('user_id', $validated['user_id'])
             ->first();
@@ -29,7 +28,7 @@ class ReviewController extends Controller
         if ($existingReview) {
             return response()->json([
                 'message' => 'Użytkownik już dodał opinię dla tej usługi.'
-            ], 422);  // Kod 422 Unprocessable Entity (lub inny według Ciebie)
+            ], 422);
         }
 
         $review = Review::create($validated);
@@ -77,8 +76,7 @@ class ReviewController extends Controller
             ->get();
 
         $count = $reviews->count();
-        $average = round($reviews->avg('rating'), 2); // np. 4.37
-
+        $average = round($reviews->avg('rating'), 2);
         $ratingsCount = [
             5 => $reviews->where('rating', 5)->count(),
             4 => $reviews->where('rating', 4)->count(),

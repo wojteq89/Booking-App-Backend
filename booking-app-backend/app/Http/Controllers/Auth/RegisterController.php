@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 
 class RegisterController extends Controller
 {
@@ -20,9 +23,9 @@ class RegisterController extends Controller
             'city' => 'required|string',
             'phone_number' => 'required|string',
         ]);
-    
+
         $role = $validatedData['role'] ?? 'user';
-    
+
         $user = new User([
             'first_name' => $validatedData['first_name'],
             'second_name' => $validatedData['second_name'],
@@ -32,9 +35,18 @@ class RegisterController extends Controller
             'city' => $validatedData['city'],
             'phone_number' => $validatedData['phone_number'],
         ]);
-        
+
         $user->save();
-    
-        return response()->json(['message' => 'User registered successfully']);
-    }    
+        // Stwórz podpisany URL do weryfikacji ważny np. 24 godziny
+        $url = URL::temporarySignedRoute(
+            'verification.verify',
+            now()->addHours(24),
+            ['id' => $user->id]
+        );
+
+        // Wyślij notyfikację
+        $user->notify(new VerifyEmailNotification($url));
+
+        return response()->json(['message' => 'User registered. Verification email sent.']);
+    }
 }

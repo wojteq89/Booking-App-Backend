@@ -19,14 +19,14 @@ class ResetPasswordController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return response()->json(['message' => 'Nie znaleziono użytkownika.'], 404);
+            return response()->json(['message' => 'User not found.'], 404);
         }
 
         $token = app('auth.password.broker')->createToken($user);
 
         $user->notify(new CustomResetPassword($token, $user->email));
 
-        return response()->json(['message' => 'Link do resetu został wysłany.']);
+        return response()->json(['message' => 'The reset link has been sent.']);
     }
 
     public function resetPassword(Request $request)
