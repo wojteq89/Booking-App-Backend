@@ -69,13 +69,20 @@ class ReviewController extends Controller
     /**
      * Get all reviews for a specific service.
      */
-    public function getServiceReviews($id)
+    public function getServiceReviews(Request $request, $id)
     {
-        $reviews = Review::where('service_id', $id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        $rating = $request->query('rating');
 
-        $count = $reviews->total();
+        $query = Review::where('service_id', $id);
+
+        if ($rating !== null && in_array($rating, [1, 2, 3, 4, 5])) {
+            $query->where('rating', $rating);
+        }
+
+        $reviews = $query->orderBy('created_at', 'desc')->paginate(10);
+
+        $count = Review::where('service_id', $id)->count();
+
         $average = round(Review::where('service_id', $id)->avg('rating'), 2);
 
         $ratingsCount = [
@@ -86,6 +93,15 @@ class ReviewController extends Controller
             1 => Review::where('service_id', $id)->where('rating', 1)->count(),
         ];
 
+        $user = auth()->user();
+        $hasReviewed = false;
+
+        if ($user) {
+            $hasReviewed = Review::where('service_id', $id)
+                ->where('user_id', $user->id)
+                ->exists();
+        }
+
         return response()->json([
             'reviews' => $reviews->items(),
             'total' => $count,
@@ -94,6 +110,7 @@ class ReviewController extends Controller
             'current_page' => $reviews->currentPage(),
             'last_page' => $reviews->lastPage(),
             'per_page' => $reviews->perPage(),
+            'has_user_reviewed' => $hasReviewed,
         ]);
     }
 }
