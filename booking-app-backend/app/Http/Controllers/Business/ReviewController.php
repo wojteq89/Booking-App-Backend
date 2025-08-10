@@ -71,25 +71,29 @@ class ReviewController extends Controller
      */
     public function getServiceReviews($id)
     {
-        $reviews = \App\Models\Review::where('service_id', $id)
+        $reviews = Review::where('service_id', $id)
             ->orderBy('created_at', 'desc')
-            ->get();
+            ->paginate(10);
 
-        $count = $reviews->count();
-        $average = round($reviews->avg('rating'), 2);
+        $count = $reviews->total();
+        $average = round(Review::where('service_id', $id)->avg('rating'), 2);
+
         $ratingsCount = [
-            5 => $reviews->where('rating', 5)->count(),
-            4 => $reviews->where('rating', 4)->count(),
-            3 => $reviews->where('rating', 3)->count(),
-            2 => $reviews->where('rating', 2)->count(),
-            1 => $reviews->where('rating', 1)->count(),
+            5 => Review::where('service_id', $id)->where('rating', 5)->count(),
+            4 => Review::where('service_id', $id)->where('rating', 4)->count(),
+            3 => Review::where('service_id', $id)->where('rating', 3)->count(),
+            2 => Review::where('service_id', $id)->where('rating', 2)->count(),
+            1 => Review::where('service_id', $id)->where('rating', 1)->count(),
         ];
 
         return response()->json([
-            'reviews' => $reviews,
+            'reviews' => $reviews->items(),
             'total' => $count,
             'average_rating' => $average,
             'ratings_breakdown' => $ratingsCount,
+            'current_page' => $reviews->currentPage(),
+            'last_page' => $reviews->lastPage(),
+            'per_page' => $reviews->perPage(),
         ]);
     }
 }
