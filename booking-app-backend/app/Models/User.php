@@ -36,4 +36,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
         ];
     }
+
+    public function favoriteServices()
+    {
+        return $this->belongsToMany(Service::class, 'favorites', 'user_id', 'service_id')
+            ->withTimestamps();
+    }
 }

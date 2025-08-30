@@ -15,7 +15,7 @@ class Service extends Model
         'images',
         'user_id',
     ];
-    
+
     public function reviews()
     {
         return $this->hasMany(Review::class);
@@ -24,5 +24,11 @@ class Service extends Model
     public function serviceItems()
     {
         return $this->hasMany(ServiceItem::class);
+    }
+
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'service_id', 'user_id')
+            ->withTimestamps();
     }
 }

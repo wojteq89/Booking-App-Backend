@@ -11,36 +11,42 @@ use App\Http\Controllers\Business\BusinessController;
 use App\Http\Controllers\Business\ServiceItemController;
 use App\Http\Controllers\Business\ReviewController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\User\FavoritesController;
 
 // Public endpoints ---------------------
-  Route::post('/login', [LoginController::class, 'login']);
-  Route::post('/register', [RegisterController::class, 'register']);
-  Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLinkEmail']);
-  Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/register', [RegisterController::class, 'register']);
+Route::post('/forgot-password', [ResetPasswordController::class, 'sendResetLinkEmail']);
+Route::post('/reset-password', [ResetPasswordController::class, 'resetPassword']);
 
 // Private endpoints ---------------------
-  Route::middleware('auth:sanctum')->group(function () {
+Route::middleware('auth:sanctum')->group(function () {
 
   // User ---------------------
-    Route::get('/user', fn(Request $request) => $request->user());
-    Route::get('/check-token-expiry', [TokenController::class, 'checkTokenExpiry']);
+  Route::get('/user', fn(Request $request) => $request->user());
+  Route::get('/check-token-expiry', [TokenController::class, 'checkTokenExpiry']);
 
   // Business ---------------------
-    Route::get('/my-business', [BusinessController::class, 'myService']);
-    Route::get('/business/{id}', [BusinessController::class, 'show']);
-    Route::post('/business-add', [BusinessController::class, 'store']);
-    Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
+  Route::get('/my-business', [BusinessController::class, 'myService']);
+  Route::get('/business/{id}', [BusinessController::class, 'show']);
+  Route::post('/business-add', [BusinessController::class, 'store']);
+  Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
 
   // Services ---------------------
-    Route::get('/service-items', [ServiceItemController::class, 'index']);
-    Route::post('/service-item-add', [ServiceItemController::class, 'store']);
-    Route::put('/service-item-update/{id}', [ServiceItemController::class, 'update']);
-    Route::delete('/service-item-delete/{id}', [ServiceItemController::class, 'destroy']);
-  
+  Route::get('/service-items', [ServiceItemController::class, 'index']);
+  Route::post('/service-item-add', [ServiceItemController::class, 'store']);
+  Route::put('/service-item-update/{id}', [ServiceItemController::class, 'update']);
+  Route::delete('/service-item-delete/{id}', [ServiceItemController::class, 'destroy']);
+
   // Reviews ---------------------
-    Route::get('/service-reviews/{id}', [ReviewController::class, 'getServiceReviews']);
-    Route::post('/reviews-add', [ReviewController::class, 'store']);
-    Route::put('/reviews-update/{id}', [ReviewController::class, 'update']);
-    Route::delete('/reviews-delete/{id}', [ReviewController::class, 'destroy']);
+  Route::get('/service-reviews/{id}', [ReviewController::class, 'getServiceReviews']);
+  Route::post('/reviews-add', [ReviewController::class, 'store']);
+  Route::put('/reviews-update/{id}', [ReviewController::class, 'update']);
+  Route::delete('/reviews-delete/{id}', [ReviewController::class, 'destroy']);
+
+  // Favorites ---------------------
+  Route::get('/favorites', [FavoritesController::class, 'index']);
+  Route::post('/favorites/{service}/toggle', [FavoritesController::class, 'toggle']);
+  Route::get('/favorites/{service}/is-favorite', [FavoritesController::class, 'isFavorite']);
 
 });
