@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Business;
-use App\Http\Controllers\Controller; 
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service;
 use Illuminate\Support\Facades\Auth;
@@ -39,9 +39,9 @@ class BusinessController extends Controller
             'opening_hours' => 'nullable|string',
             'images.*' => 'nullable|image|max:2048',
         ]);
-    
+
         $folderName = Str::slug($request->name) . '-' . time();
-    
+
         $imagePaths = [];
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $image) {
@@ -49,7 +49,7 @@ class BusinessController extends Controller
                 $imagePaths[] = Storage::url($path);
             }
         }
-    
+
         $service = new Service();
         $service->name = $request->name;
         $service->category = $request->category;
@@ -59,11 +59,11 @@ class BusinessController extends Controller
         $service->images = json_encode($imagePaths);
         $service->user_id = Auth::id();
         $service->save();
-    
+
         $user = Auth::user();
         $user->role = 'owner';
         $user->save();
-    
+
         return response()->json(['message' => 'Business added', 'business' => $service], 201);
     }
 
@@ -73,11 +73,11 @@ class BusinessController extends Controller
     public function show(string $id)
     {
         $service = Service::find($id);
-    
+
         if (!$service) {
             return response()->json(['message' => 'Business not found'], 404);
         }
-    
+
         return response()->json(['Business' => $service]);
     }
 
@@ -92,10 +92,56 @@ class BusinessController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+        $service = Service::findOrFail($id);
+
+        if ($service->user_id !== Auth::id()) {
+            return response()->json(['message' => 'No permission'], 403);
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category' => 'required|string',
+            'location' => 'required|string',
+            'description' => 'nullable|string',
+            'opening_hours' => 'nullable|string',
+            'images.*' => 'nullable|image|max:2048',
+            'existing_images' => 'nullable|string', // JSON
+        ]);
+
+        $service->name = $request->name;
+        $service->category = $request->category;
+        $service->location = $request->location;
+        $service->description = $request->description;
+        $service->opening_hours = $request->opening_hours;
+
+        // Startujemy od istniejących zdjęć
+        $allImages = [];
+        if ($request->existing_images) {
+            $existing = json_decode($request->existing_images, true);
+            if (is_array($existing)) {
+                $allImages = $existing; // zachowujemy stare zdjęcia
+            }
+        }
+
+        // Dodajemy nowe zdjęcia z uploadu
+        if ($request->hasFile('images')) {
+            $folderName = Str::slug($request->name) . '-' . time();
+            foreach ($request->file('images') as $image) {
+                $path = $image->store("business/{$folderName}", 'public');
+                $allImages[] = Storage::url($path);
+            }
+        }
+
+        // Zapisujemy wszystkie zdjęcia razem
+        $service->images = json_encode($allImages);
+
+        $service->save();
+
+        return response()->json(['message' => 'Business updated', 'business' => $service]);
     }
+
 
     /**
      * Remove the specified resource from storage.
@@ -103,21 +149,21 @@ class BusinessController extends Controller
     public function destroy(string $id)
     {
         $service = Service::findOrFail($id);
-    
+
         if ($service->user_id !== Auth::id()) {
             return response()->json(['message' => 'No permission'], 403);
         }
-    
+
         $service->delete();
-    
+
         $user = Auth::user();
         $hasOtherServices = Service::where('user_id', $user->id)->exists();
-    
+
         if (!$hasOtherServices) {
             $user->role = 'user';
             $user->save();
         }
-    
+
         return response()->json(['message' => 'Business deleted']);
     }
 

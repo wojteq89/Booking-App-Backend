@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::get('/my-business', [BusinessController::class, 'myService']);
   Route::get('/business/{id}', [BusinessController::class, 'show']);
   Route::post('/business-add', [BusinessController::class, 'store']);
+  Route::post('/business-update/{id}', [BusinessController::class, 'update']);
   Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
 
   // Services ---------------------
