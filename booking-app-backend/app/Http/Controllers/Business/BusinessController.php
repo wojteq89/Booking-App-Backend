@@ -10,30 +10,33 @@ use Illuminate\Support\Str;
 
 class BusinessController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = Service::query();
+
+        if ($request->has('category') && $request->category !== '') {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('search') && $request->search !== '') {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', $searchTerm)
+                    ->orWhere('description', 'like', $searchTerm);
+            });
+        }
+
+        $perPage = 10;
+        $businesses = $query->paginate($perPage);
+
+        return response()->json($businesses);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'location' => 'required|string',
             'description' => 'nullable|string',
             'opening_hours' => 'nullable|string',
@@ -52,7 +55,7 @@ class BusinessController extends Controller
 
         $service = new Service();
         $service->name = $request->name;
-        $service->category = $request->category;
+        $service->category_id = $request->category_id;
         $service->location = $request->location;
         $service->description = $request->description;
         $service->opening_hours = $request->opening_hours;
@@ -67,9 +70,6 @@ class BusinessController extends Controller
         return response()->json(['message' => 'Business added', 'business' => $service], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(string $id)
     {
         $service = Service::find($id);
@@ -81,17 +81,6 @@ class BusinessController extends Controller
         return response()->json(['Business' => $service]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $service = Service::findOrFail($id);
@@ -102,30 +91,28 @@ class BusinessController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'category' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
             'location' => 'required|string',
             'description' => 'nullable|string',
             'opening_hours' => 'nullable|string',
             'images.*' => 'nullable|image|max:2048',
-            'existing_images' => 'nullable|string', // JSON
+            'existing_images' => 'nullable|string',
         ]);
 
         $service->name = $request->name;
-        $service->category = $request->category;
+        $service->category_id = $request->category_id;
         $service->location = $request->location;
         $service->description = $request->description;
         $service->opening_hours = $request->opening_hours;
 
-        // Startujemy od istniejących zdjęć
         $allImages = [];
         if ($request->existing_images) {
             $existing = json_decode($request->existing_images, true);
             if (is_array($existing)) {
-                $allImages = $existing; // zachowujemy stare zdjęcia
+                $allImages = $existing;
             }
         }
 
-        // Dodajemy nowe zdjęcia z uploadu
         if ($request->hasFile('images')) {
             $folderName = Str::slug($request->name) . '-' . time();
             foreach ($request->file('images') as $image) {
@@ -134,7 +121,6 @@ class BusinessController extends Controller
             }
         }
 
-        // Zapisujemy wszystkie zdjęcia razem
         $service->images = json_encode($allImages);
 
         $service->save();
@@ -142,10 +128,6 @@ class BusinessController extends Controller
         return response()->json(['message' => 'Business updated', 'business' => $service]);
     }
 
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
         $service = Service::findOrFail($id);

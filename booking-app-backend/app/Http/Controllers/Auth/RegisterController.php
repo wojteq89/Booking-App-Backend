@@ -37,14 +37,12 @@ class RegisterController extends Controller
         ]);
 
         $user->save();
-        // Stwórz podpisany URL do weryfikacji ważny np. 24 godziny
         $url = URL::temporarySignedRoute(
             'verification.verify',
             now()->addHours(24),
             ['id' => $user->id]
         );
 
-        // Wyślij notyfikację
         $user->notify(new VerifyEmailNotification($url));
 
         return response()->json(['message' => 'User registered. Verification email sent.']);

@@ -50,7 +50,6 @@ class ResetPasswordController extends Controller
             return view('auth.password-reset-success');
         }
 
-        // 🔁 Jeśli reset się nie powiedzie, np. token zły
         return back()->withErrors(['email' => [__($status)]]);
     }
 }

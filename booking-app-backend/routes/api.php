@@ -12,6 +12,7 @@ use App\Http\Controllers\Business\ServiceItemController;
 use App\Http\Controllers\Business\ReviewController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\FavoritesController;
+use App\Http\Controllers\CategoryController;
 
 // Public endpoints ---------------------
 Route::post('/login', [LoginController::class, 'login']);
@@ -28,10 +29,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
   // Business ---------------------
   Route::get('/my-business', [BusinessController::class, 'myService']);
+  Route::get('/businesses-all', [BusinessController::class, 'index']);
   Route::get('/business/{id}', [BusinessController::class, 'show']);
   Route::post('/business-add', [BusinessController::class, 'store']);
   Route::post('/business-update/{id}', [BusinessController::class, 'update']);
   Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
+
+  // Categories ---------------------
+  Route::get('/categories', [CategoryController::class, 'index']);
+
 
   // Services ---------------------
   Route::get('/service-items', [ServiceItemController::class, 'index']);

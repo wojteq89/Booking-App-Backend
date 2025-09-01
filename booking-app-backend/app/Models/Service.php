@@ -8,7 +8,7 @@ class Service extends Model
 {
     protected $fillable = [
         'name',
-        'category',
+        'category_id',
         'location',
         'description',
         'opening_hours',
@@ -30,5 +30,10 @@ class Service extends Model
     {
         return $this->belongsToMany(User::class, 'favorites', 'service_id', 'user_id')
             ->withTimestamps();
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
     }
 }
