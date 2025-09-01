@@ -78,7 +78,7 @@ class BusinessController extends Controller
             return response()->json(['message' => 'Business not found'], 404);
         }
 
-        return response()->json(['Business' => $service]);
+        return response()->json(['business' => $service]);
     }
 
     public function update(Request $request, $id)
