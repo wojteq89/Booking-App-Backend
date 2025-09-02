@@ -18,8 +18,22 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->decimal('price', 8, 2)->nullable();
             $table->integer('duration')->nullable();
+            
+            $table->enum('color', [
+                'red',
+                'blue',
+                'green',
+                'yellow',
+                'purple',
+                'orange',
+                'pink',
+                'teal',
+                'gray',
+                'black'
+            ])->nullable();
+            
             $table->timestamps();
-        });        
+        });
     }
 
     /**

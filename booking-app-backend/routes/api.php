@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
   // Services ---------------------
-  Route::get('/service-items', [ServiceItemController::class, 'index']);
+  Route::get('/service-items/{service_id}', [ServiceItemController::class, 'index']); // Zmieniona trasa
   Route::post('/service-item-add', [ServiceItemController::class, 'store']);
   Route::put('/service-item-update/{id}', [ServiceItemController::class, 'update']);
   Route::delete('/service-item-delete/{id}', [ServiceItemController::class, 'destroy']);

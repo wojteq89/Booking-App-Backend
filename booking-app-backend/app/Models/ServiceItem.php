@@ -12,6 +12,7 @@ class ServiceItem extends Model
         'description',
         'price',
         'duration',
+        'color',
     ];
 
     public function service()

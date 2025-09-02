@@ -6,19 +6,15 @@ use Illuminate\Http\Request;
 use App\Models\ServiceItem;
 use App\Models\Service;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class ServiceItemController extends Controller
 {
-    public function index()
+    public function index($service_id)
     {
-        $user = Auth::user();
-
-        $items = ServiceItem::whereHas('service', function ($query) use ($user) {
-            $query->where('user_id', $user->id);
-        })->get();
+        $items = ServiceItem::where('service_id', $service_id)->get();
 
         return response()->json(['services' => $items]);
-
     }
 
     public function store(Request $request)
@@ -29,6 +25,22 @@ class ServiceItemController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric',
             'duration' => 'nullable|integer',
+            'color' => [
+                'nullable',
+                'string',
+                Rule::in([
+                    'red',
+                    'blue',
+                    'green',
+                    'yellow',
+                    'purple',
+                    'orange',
+                    'pink',
+                    'teal',
+                    'gray',
+                    'black'
+                ]),
+            ],
         ]);
 
         $service = Service::findOrFail($request->service_id);
@@ -50,7 +62,30 @@ class ServiceItemController extends Controller
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        $item->update($request->only(['name', 'description', 'price', 'duration']));
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'nullable|numeric',
+            'duration' => 'nullable|integer',
+            'color' => [
+                'nullable',
+                'string',
+                Rule::in([
+                    'red',
+                    'blue',
+                    'green',
+                    'yellow',
+                    'purple',
+                    'orange',
+                    'pink',
+                    'teal',
+                    'gray',
+                    'black'
+                ]),
+            ],
+        ]);
+
+        $item->update($request->only(['name', 'description', 'price', 'duration', 'color']));
 
         return response()->json($item);
     }
