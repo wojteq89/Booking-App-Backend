@@ -13,6 +13,7 @@ use App\Http\Controllers\Business\ReviewController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\FavoritesController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Business\AppointmentController;
 
 // Public endpoints ---------------------
 Route::post('/login', [LoginController::class, 'login']);
@@ -56,4 +57,10 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::post('/favorites/{service}/toggle', [FavoritesController::class, 'toggle']);
   Route::get('/favorites/{service}/is-favorite', [FavoritesController::class, 'isFavorite']);
 
+  // Appointments ---------------------
+  Route::get('/appointments/{id}', [AppointmentController::class, 'index']);
+  Route::post('/appointments', [AppointmentController::class, 'store']);
+  Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
+  Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
+  Route::get('/appointments/slots/{service_id}', [AppointmentController::class, 'getAvailableSlots']);
 });
