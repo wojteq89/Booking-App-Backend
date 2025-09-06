@@ -38,7 +38,7 @@ class AppointmentController extends Controller
         // 2. Sprawdź, czy termin wizyty przypada w godzinach otwarcia biznesu
         $dayOfWeek = $appointmentStart->englishDayOfWeek;
         $openingHoursString = $business->opening_hours;
-        $openingHours = explode("\r\n", $openingHoursString);
+        $openingHours = preg_split('/\r\n|\r|\n/', subject: $openingHoursString);
         $dayIndex = ($appointmentStart->dayOfWeek + 6) % 7;
         $hours = trim($openingHours[$dayIndex]);
 
@@ -58,13 +58,12 @@ class AppointmentController extends Controller
 
         // 3. Sprawdź, czy termin nie koliduje z inną wizytą
         $hasConflict = Appointment::where('service_id', $business->id)
+            ->whereDate('start', $appointmentStart->toDateString()) // tylko ten dzień
             ->where(function ($query) use ($appointmentStart, $appointmentEnd) {
-                $query->whereBetween('start', [$appointmentStart, $appointmentEnd])
-                    ->orWhereBetween('end', [$appointmentStart, $appointmentEnd])
-                    ->orWhere(function ($query) use ($appointmentStart, $appointmentEnd) {
-                        $query->where('start', '<=', $appointmentStart)
-                            ->where('end', '>=', $appointmentEnd);
-                    });
+                $query->where(function ($q) use ($appointmentStart, $appointmentEnd) {
+                    $q->where('start', '<', $appointmentEnd)
+                        ->where('end', '>', $appointmentStart);
+                });
             })
             ->exists();
 
@@ -76,8 +75,7 @@ class AppointmentController extends Controller
         $appointment = Appointment::create([
             'service_id' => $business->id,
             'service_item_id' => $serviceItem->id,
-            'service_item_name' => $serviceItem->name,
-            'service_item_color' => $serviceItem->color,
+            'user_id' => auth()->id(),
             'start' => $appointmentStart,
             'end' => $appointmentEnd,
         ]);
@@ -100,6 +98,12 @@ class AppointmentController extends Controller
 
         $date = Carbon::parse($request->date);
 
+        // Sprawdzenie, czy data nie jest wstecz
+        if ($date->isBefore(now()->startOfDay())) {
+            return response()->json(['message' => 'Nie można rezerwować wstecz.'], 200);
+
+        }
+
         // Godziny otwarcia z service
         $openingHoursString = $service->opening_hours;
         $openingHours = preg_split('/\r\n|\r|\n/', $openingHoursString);
@@ -107,8 +111,11 @@ class AppointmentController extends Controller
         $dayIndex = ($date->dayOfWeek + 6) % 7;
 
         if (!isset($openingHours[$dayIndex])) {
-            return response()->json(['message' => 'Brak godzin otwarcia dla tego dnia.'], 400);
+            return response()->json(['message' => 'Brak godzin otwarcia dla tego dnia.'], 200);
         }
+
+        \Log::info('Opening hours array', $openingHours);
+        \Log::info('Day index', [$dayIndex]);
 
         $hours = trim($openingHours[$dayIndex]);
 

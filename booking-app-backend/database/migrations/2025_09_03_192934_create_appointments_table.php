@@ -10,10 +10,9 @@ return new class extends Migration {
     {
         Schema::create('appointments', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             $table->foreignId('service_id')->constrained()->onDelete('cascade');
             $table->foreignId('service_item_id')->constrained('service_items')->onDelete('cascade');
-            $table->string('service_item_name');
-            $table->string('service_item_color')->nullable();
             $table->dateTime('start');
             $table->dateTime('end')->nullable();
             $table->timestamps();
