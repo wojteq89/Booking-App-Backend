@@ -41,6 +41,10 @@ class BusinessController extends Controller
             'description' => 'nullable|string',
             'opening_hours' => 'nullable|string',
             'images.*' => 'nullable|image|max:2048',
+            'facebook_url' => 'nullable|string|url',
+            'instagram_url' => 'nullable|string|url',
+            'youtube_url' => 'nullable|string|url',
+            'website_url' => 'nullable|string|url',
         ]);
 
         $folderName = Str::slug($request->name) . '-' . time();
@@ -60,6 +64,10 @@ class BusinessController extends Controller
         $service->description = $request->description;
         $service->opening_hours = $request->opening_hours;
         $service->images = json_encode($imagePaths);
+        $service->facebook_url = $request->facebook_url;
+        $service->instagram_url = $request->instagram_url;
+        $service->youtube_url = $request->youtube_url;
+        $service->website_url = $request->website_url;
         $service->user_id = Auth::id();
         $service->save();
 
@@ -97,6 +105,10 @@ class BusinessController extends Controller
             'opening_hours' => 'nullable|string',
             'images.*' => 'nullable|image|max:2048',
             'existing_images' => 'nullable|string',
+            'facebook_url' => 'nullable|string|url',
+            'instagram_url' => 'nullable|string|url',
+            'youtube_url' => 'nullable|string|url',
+            'website_url' => 'nullable|string|url',
         ]);
 
         $service->name = $request->name;
@@ -104,6 +116,10 @@ class BusinessController extends Controller
         $service->location = $request->location;
         $service->description = $request->description;
         $service->opening_hours = $request->opening_hours;
+        $service->facebook_url = $request->facebook_url;
+        $service->instagram_url = $request->instagram_url;
+        $service->youtube_url = $request->youtube_url;
+        $service->website_url = $request->website_url;
 
         $allImages = [];
         if ($request->existing_images) {

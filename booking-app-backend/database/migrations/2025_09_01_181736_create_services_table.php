@@ -16,8 +16,13 @@ return new class extends Migration {
             $table->text('description')->nullable();
             $table->string('opening_hours')->nullable();
             $table->json('images')->nullable();
-            $table->timestamps();
 
+            $table->string('facebook_url')->nullable();
+            $table->string('instagram_url')->nullable();
+            $table->string('youtube_url')->nullable();
+            $table->string('website_url')->nullable();
+
+            $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('category_id')->references('id')->on('categories')->onDelete('set null');
         });

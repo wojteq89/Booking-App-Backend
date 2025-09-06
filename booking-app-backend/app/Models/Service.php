@@ -14,6 +14,10 @@ class Service extends Model
         'opening_hours',
         'images',
         'user_id',
+        'facebook_url',
+        'instagram_url',
+        'youtube_url',
+        'website_url',
     ];
 
     public function reviews()
