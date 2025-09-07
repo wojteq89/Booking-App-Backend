@@ -30,24 +30,16 @@ Route::middleware('auth:sanctum')->group(function () {
 
   // Business ---------------------
   Route::get('/my-business', [BusinessController::class, 'myService']);
-  Route::get('/businesses-all', [BusinessController::class, 'index']);
-  Route::get('/business/{id}', [BusinessController::class, 'show']);
   Route::post('/business-add', [BusinessController::class, 'store']);
   Route::post('/business-update/{id}', [BusinessController::class, 'update']);
   Route::delete('/business-delete/{id}', [BusinessController::class, 'destroy']);
 
-  // Categories ---------------------
-  Route::get('/categories', [CategoryController::class, 'index']);
-
-
   // Services ---------------------
-  Route::get('/service-items/{service_id}', [ServiceItemController::class, 'index']); // Zmieniona trasa
   Route::post('/service-item-add', [ServiceItemController::class, 'store']);
   Route::put('/service-item-update/{id}', [ServiceItemController::class, 'update']);
   Route::delete('/service-item-delete/{id}', [ServiceItemController::class, 'destroy']);
 
   // Reviews ---------------------
-  Route::get('/service-reviews/{id}', [ReviewController::class, 'getServiceReviews']);
   Route::post('/reviews-add', [ReviewController::class, 'store']);
   Route::put('/reviews-update/{id}', [ReviewController::class, 'update']);
   Route::delete('/reviews-delete/{id}', [ReviewController::class, 'destroy']);
@@ -64,3 +56,21 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
   Route::get('/appointments/slots/{service_id}', [AppointmentController::class, 'getAvailableSlots']);
 });
+
+// Unauthenticated routes ---------------------
+
+// Business ---------------------
+Route::get('/businesses-all', [BusinessController::class, 'index']);
+Route::get('/business/{id}', [BusinessController::class, 'show']);
+
+// Categories ---------------------
+Route::get('/categories', [CategoryController::class, 'index']);
+
+// Services ---------------------
+Route::get('/service-items/{service_id}', [ServiceItemController::class, 'index']);
+
+// Reviews ---------------------
+Route::get('/service-reviews/{id}', [ReviewController::class, 'getServiceReviews']);
+
+// Appointments ---------------------
+Route::get('/appointments/slots/{service_id}', [AppointmentController::class, 'getAvailableSlots']);

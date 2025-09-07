@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use App\Notifications\VerifyEmailNotification;
+use Illuminate\Support\Facades\URL;
 
 class LoginController extends Controller
 {
@@ -26,6 +28,19 @@ class LoginController extends Controller
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Invalid credentials'], 401);
+        }
+
+        if ($user && is_null($user->is_email_verified)) {
+            $url = URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addHours(24),
+                ['id' => $user->id]
+            );
+            $user->notify(new VerifyEmailNotification($url));
+            return response()->json([
+                'message' => 'Email not verified. Verification email has been resent.',
+                'status' => 'email_not_verified'
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
