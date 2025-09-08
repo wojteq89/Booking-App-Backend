@@ -14,7 +14,7 @@ class AppointmentController extends Controller
 {
     public function index($id)
     {
-        $appointments = Appointment::where('service_id', $id)->get();
+        $appointments = Appointment::with('serviceItem')->where('service_id', $id)->get();
         return response()->json($appointments);
     }
 
@@ -187,7 +187,7 @@ class AppointmentController extends Controller
     public function cancelAppointment(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);
-        
+
         if ($appointment->user_id !== auth()->id()) {
             return response()->json(['message' => 'Nie masz uprawnień do anulowania tej wizyty.'], 403);
         }
