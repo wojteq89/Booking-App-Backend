@@ -90,21 +90,16 @@ class AppointmentController extends Controller
             'service_item_id' => 'required|exists:service_items,id',
         ]);
 
-        // Pobieramy service_item
         $serviceItem = ServiceItem::findOrFail($request->service_item_id);
-
-        // Pobieramy nadrzędny service
-        $service = $serviceItem->service; // relacja w modelu ServiceItem: belongsTo(Service)
+        $service = $serviceItem->service;
 
         $date = Carbon::parse($request->date);
 
-        // Sprawdzenie, czy data nie jest wstecz
         if ($date->isBefore(now()->startOfDay())) {
             return response()->json(['message' => 'Nie można rezerwować wstecz.'], 200);
 
         }
 
-        // Godziny otwarcia z service
         $openingHoursString = $service->opening_hours;
         $openingHours = preg_split('/\r\n|\r|\n/', $openingHoursString);
 
@@ -128,7 +123,6 @@ class AppointmentController extends Controller
         $open = Carbon::parse($request->date . ' ' . $openTime);
         $close = Carbon::parse($request->date . ' ' . $closeTime);
 
-        // Pobranie istniejących wizyt dla tego service_item
         $existingAppointments = Appointment::where('service_item_id', $serviceItem->id)
             ->whereDate('start', $date->toDateString())
             ->orderBy('start')
@@ -164,6 +158,45 @@ class AppointmentController extends Controller
         return response()->json(['available_slots' => $availableSlots]);
     }
 
+    public function getUserAppointments()
+    {
+        $userId = auth()->id();
+        if (!$userId) {
+            return response()->json(['message' => 'Użytkownik nie jest zalogowany.'], 401);
+        }
+
+        $appointments = Appointment::with(['service', 'serviceItem'])
+            ->where('user_id', $userId)
+            ->get();
+
+        $now = Carbon::now();
+
+        foreach ($appointments as $appointment) {
+            if ($appointment->end && Carbon::parse($appointment->end)->lessThan($now) && $appointment->status !== 'Zakończona') {
+                $appointment->status = 'Zakończona';
+                $appointment->save();
+            }
+        }
+        $updatedAppointments = Appointment::with(['service', 'serviceItem'])
+            ->where('user_id', $userId)
+            ->get();
+
+        return response()->json($updatedAppointments);
+    }
+
+    public function cancelAppointment(Request $request, $id)
+    {
+        $appointment = Appointment::findOrFail($id);
+        
+        if ($appointment->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Nie masz uprawnień do anulowania tej wizyty.'], 403);
+        }
+
+        $appointment->status = 'Anulowana';
+        $appointment->save();
+
+        return response()->json(['message' => 'Wizyta została pomyślnie anulowana.']);
+    }
 
     public function update(Request $request, $id)
     {

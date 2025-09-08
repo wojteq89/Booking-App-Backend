@@ -55,6 +55,11 @@ Route::middleware('auth:sanctum')->group(function () {
   Route::put('/appointments/{id}', [AppointmentController::class, 'update']);
   Route::delete('/appointments/{id}', [AppointmentController::class, 'destroy']);
   Route::get('/appointments/slots/{service_id}', [AppointmentController::class, 'getAvailableSlots']);
+
+  // History of reservations ---------------------
+  Route::get('/user/appointments', [AppointmentController::class, 'getUserAppointments']);
+  Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancelAppointment']);
+
 });
 
 // Unauthenticated routes ---------------------

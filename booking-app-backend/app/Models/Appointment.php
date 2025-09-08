@@ -15,6 +15,7 @@ class Appointment extends Model
         'user_id',
         'start',
         'end',
+        'status',
     ];
 
     public function service()

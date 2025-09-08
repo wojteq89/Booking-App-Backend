@@ -15,6 +15,7 @@ return new class extends Migration {
             $table->foreignId('service_item_id')->constrained('service_items')->onDelete('cascade');
             $table->dateTime('start');
             $table->dateTime('end')->nullable();
+            $table->enum('status', ['Anulowana', 'Potwierdzona', 'Zakończona'])->default('Potwierdzona');
             $table->timestamps();
         });
     }
