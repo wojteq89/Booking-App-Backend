@@ -14,9 +14,30 @@ class AppointmentController extends Controller
 {
     public function index($id)
     {
-        $appointments = Appointment::with('serviceItem')->where('service_id', $id)->get();
-        return response()->json($appointments);
+        $appointments = Appointment::with('serviceItem')
+            ->where('service_id', $id)
+            ->get();
+
+        $now = Carbon::now();
+
+        foreach ($appointments as $appointment) {
+            if (
+                $appointment->end &&
+                Carbon::parse($appointment->end)->lessThan($now) &&
+                $appointment->status !== 'Zakończona'
+            ) {
+                $appointment->status = 'Zakończona';
+                $appointment->save();
+            }
+        }
+
+        $updatedAppointments = Appointment::with('serviceItem')
+            ->where('service_id', $id)
+            ->get();
+
+        return response()->json($updatedAppointments);
     }
+
 
     public function store(Request $request)
     {
