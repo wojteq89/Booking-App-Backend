@@ -186,25 +186,33 @@ class AppointmentController extends Controller
             return response()->json(['message' => 'Użytkownik nie jest zalogowany.'], 401);
         }
 
-        $appointments = Appointment::with(['service', 'serviceItem'])
-            ->where('user_id', $userId)
-            ->get();
-
         $now = Carbon::now();
 
-        foreach ($appointments as $appointment) {
-            if ($appointment->end && Carbon::parse($appointment->end)->lessThan($now) && $appointment->status !== 'Zakończona') {
-                $appointment->status = 'Zakończona';
-                $appointment->save();
-            }
-        }
-        $updatedAppointments = Appointment::with(['service', 'serviceItem'])
+        // 1. Aktualizacja statusów zakończonych rezerwacji
+        Appointment::where('user_id', $userId)
+            ->where('end', '<', $now)
+            ->where('status', '!=', 'Zakończona')
+            ->update(['status' => 'Zakończona']);
+
+        // 2. Pobranie wszystkich potwierdzonych rezerwacji
+        $confirmedAppointments = Appointment::with(['service', 'serviceItem'])
             ->where('user_id', $userId)
+            ->where('status', 'Potwierdzona')
             ->get();
 
-        return response()->json($updatedAppointments);
-    }
+        // 3. Pobranie trzech ostatnich zakończonych LUB anulowanych rezerwacji
+        $recentHistoryAppointments = Appointment::with(['service', 'serviceItem'])
+            ->where('user_id', $userId)
+            ->whereIn('status', ['Zakończona', 'Anulowana'])
+            ->orderBy('end', 'desc')
+            ->take(15)
+            ->get();
 
+        // 4. Połączenie wyników i usunięcie duplikatów
+        $appointments = $confirmedAppointments->merge($recentHistoryAppointments)->unique('id');
+
+        return response()->json($appointments);
+    }
     public function cancelAppointment(Request $request, $id)
     {
         $appointment = Appointment::findOrFail($id);

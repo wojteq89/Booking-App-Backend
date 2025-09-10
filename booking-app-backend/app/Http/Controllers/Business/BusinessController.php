@@ -32,6 +32,39 @@ class BusinessController extends Controller
         return response()->json($businesses);
     }
 
+    public function nearbyServices(Request $request)
+    {
+        $user = $request->user();
+
+        if (!$user || !$user->city) {
+            return response()->json([
+                'data' => [],
+                'message' => 'Brak miasta dla użytkownika'
+            ]);
+        }
+
+        $query = Service::query();
+
+        if ($request->has('category') && $request->category !== '') {
+            $query->where('category', $request->category);
+        }
+
+        if ($request->has('search') && $request->search !== '') {
+            $searchTerm = '%' . $request->search . '%';
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where('name', 'like', $searchTerm)
+                    ->orWhere('description', 'like', $searchTerm);
+            });
+        }
+
+        $query->where('location', 'like', '%' . $user->city . '%');
+
+        $perPage = 10;
+        $services = $query->paginate($perPage);
+
+        return response()->json($services);
+    }
+
     public function store(Request $request)
     {
         $request->validate([
