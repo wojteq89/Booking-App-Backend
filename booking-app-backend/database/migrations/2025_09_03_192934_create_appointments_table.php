@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->dateTime('start');
             $table->dateTime('end')->nullable();
             $table->enum('status', ['Anulowana', 'Potwierdzona', 'Zakończona'])->default('Potwierdzona');
+            $table->string('ext_order_id')->nullable()->unique();
             $table->timestamps();
         });
     }

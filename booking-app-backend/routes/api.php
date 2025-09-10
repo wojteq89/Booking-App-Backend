@@ -14,6 +14,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\User\FavoritesController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Business\AppointmentController;
+use App\Http\Controllers\PaymentController;
 
 // Public endpoints ---------------------
 Route::post('/login', [LoginController::class, 'login']);
@@ -60,6 +61,12 @@ Route::middleware('auth:sanctum')->group(function () {
   // History of reservations ---------------------
   Route::get('/user/appointments', [AppointmentController::class, 'getUserAppointments']);
   Route::post('/appointments/{id}/cancel', [AppointmentController::class, 'cancelAppointment']);
+
+  // Payments ---------------------
+  Route::post('/appointments/{appointment}/pay', [PaymentController::class, 'pay'])->name('appointments.pay');
+  Route::get('/payment/success', [PaymentController::class, 'success'])->name('payment.success');
+  Route::post('/payment/notify', [PaymentController::class, 'notify'])->name('payment.notify');
+
 
 });
 
